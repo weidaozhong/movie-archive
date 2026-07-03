@@ -26,3 +26,6 @@ docs/superpowers/
 Thumbs.db
 .vscode/
 .idea/
+
+# Local Netlify folder
+.netlify

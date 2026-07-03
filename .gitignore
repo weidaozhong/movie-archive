@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+out/
+dist/
+build/
+
+# local env and secrets
+.env
+.env.*
+*.pem
+*.key
+*token*
+*secret*
+*credential*
+
+# local-only development notes
+docs/superpowers/
+.agents/
+.codex/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -12,18 +12,6 @@
 - 主记录、碎片记录、标签
 - 可选 BGM 开关
 
-## 本地运行
+## 许可证
 
-```bash
-npm install
-npm run dev
-```
-
-打开 http://localhost:3000
-
-## 构建与测试
-
-```bash
-npm test
-npm run build
-```
+本项目使用 [Apache-2.0 license](LICENSE)。

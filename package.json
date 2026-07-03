@@ -15,5 +15,6 @@
     "typescript": "latest"
   },
   "devDependencies": {},
-  "type": "module"
+  "type": "module",
+  "license": "Apache-2.0"
 }

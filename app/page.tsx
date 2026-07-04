@@ -1,10 +1,18 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MOOD_MARKS, addRecord, bindPendingRecord, extractTagCandidates } from '../lib/guest-library.js';
 
 const STORAGE_KEY = 'movie-archive-prototype';
 const EMPTY_PALETTE = ['#2f3437', '#8f2f35'];
+const LEGACY_MOVIE_SEARCH: Record<string, string> = {
+  inception: 'Inception',
+  'mood-love': 'In the Mood for Love',
+  'spirited-away': 'Spirited Away',
+  interstellar: 'Interstellar',
+  farewell: 'Farewell My Concubine',
+  monster: 'Monster 2023 Kore-eda',
+};
 
 type Movie = {
   id: string;
@@ -65,6 +73,17 @@ function hydrateState(value: string | null): LibraryState {
   }
 }
 
+function needsPosterMigration(record: any) {
+  return record?.movie?.id && !record.movie.posterUrl && LEGACY_MOVIE_SEARCH[record.movie.id];
+}
+
+async function fetchFirstMovie(query: string) {
+  const response = await fetch(`/.netlify/functions/search?q=${encodeURIComponent(query)}`);
+  if (!response.ok) return null;
+  const data = await response.json();
+  return data.results?.[0] || null;
+}
+
 function formatMonth(records: any[]) {
   return records.reduce((groups: Record<string, any[]>, record) => {
     const date = new Date(record.collectedAt);
@@ -108,6 +127,32 @@ export default function Page() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    const legacyRecords = state.records.filter(needsPosterMigration);
+    if (!legacyRecords.length) return;
+
+    let cancelled = false;
+    Promise.all(legacyRecords.map(async (record) => {
+      const movie = await fetchFirstMovie(LEGACY_MOVIE_SEARCH[record.movie.id]);
+      return movie ? [record.id, movie] : null;
+    })).then((entries) => {
+      if (cancelled) return;
+      const updates = new Map(entries.filter(Boolean) as [string, Movie][]);
+      if (!updates.size) return;
+      setState((current) => ({
+        ...current,
+        records: current.records.map((record) => updates.has(record.id) ? { ...record, movie: { ...record.movie, ...updates.get(record.id) } } : record),
+        pendingRecord: current.pendingRecord && updates.has(current.pendingRecord.id)
+          ? { ...current.pendingRecord, movie: { ...current.pendingRecord.movie, ...updates.get(current.pendingRecord.id) } }
+          : current.pendingRecord,
+      }));
+    }).catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state.records]);
 
   useEffect(() => {
     localStorage.setItem('movie-archive-music', musicOn ? 'on' : 'off');

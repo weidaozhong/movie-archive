@@ -132,14 +132,14 @@ export default function Page() {
       setSearching(true);
       setSearchError('');
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(normalized)}`, { signal: controller.signal });
+        const response = await fetch(`/.netlify/functions/search?q=${encodeURIComponent(normalized)}`, { signal: controller.signal });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || '搜索失败');
         setResults(data.results || []);
       } catch (error: any) {
         if (error.name !== 'AbortError') {
           setResults([]);
-          setSearchError('搜索失败，请稍后重试。');
+          setSearchError(error.message || '搜索失败，请稍后重试。');
         }
       } finally {
         if (!controller.signal.aborted) setSearching(false);

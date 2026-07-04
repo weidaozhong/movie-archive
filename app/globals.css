@@ -23,8 +23,12 @@ h1 { margin: 0; font-size: clamp(34px, 5vw, 72px); font-weight: 520; letter-spac
 .searchPanel { position: relative; max-width: 680px; margin-bottom: 36px; }
 .searchPanel input, textarea, .manualTag input, .fragmentBox input, .modal input { width: 100%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 14px 16px; }
 .results { position: absolute; z-index: 3; inset-inline: 0; top: calc(100% + 8px); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 8px; overflow: hidden; }
-.results button { width: 100%; display: flex; justify-content: space-between; gap: 16px; border: 0; background: transparent; padding: 14px 16px; text-align: left; }
+.results button { width: 100%; min-height: 76px; display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 14px; border: 0; background: transparent; padding: 10px 14px; text-align: left; color: var(--ink); }
 .results button:hover { background: #f1eee7; }
+.resultText { min-width: 0; display: grid; gap: 4px; }
+.resultText strong, .resultText small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.resultText small, .results button > span:last-child { color: var(--muted); font-size: 12px; }
+.emptyResult { margin: 0; padding: 14px 16px; color: var(--muted); }
 
 .collectionShelf { margin: 0 0 38px; padding: clamp(18px, 3vw, 28px); border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg, #fffefa, #f1eee7); box-shadow: var(--shadow); overflow: hidden; }
 .shelfHeader { display: flex; align-items: start; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
@@ -32,15 +36,15 @@ h1 { margin: 0; font-size: clamp(34px, 5vw, 72px); font-weight: 520; letter-spac
 .shelfHeader span { color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; background: rgba(255,255,255,.68); }
 .shelfStage { position: relative; height: clamp(260px, 34vw, 390px); perspective: 1200px; transform-style: preserve-3d; }
 .shelfStage::before { content: ''; position: absolute; left: 6%; right: 6%; bottom: 24px; height: 18px; border-radius: 50%; background: radial-gradient(ellipse, rgba(31,35,40,.18), transparent 68%); filter: blur(10px); }
+.emptyShelf > p { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); text-align: center; }
 .shelfMovie { --offset: 0; --abs-offset: 0; position: absolute; left: 50%; bottom: 42px; width: clamp(118px, 13vw, 172px); border: 0; background: transparent; color: var(--ink); padding: 0; text-align: left; transform-style: preserve-3d; transform: translateX(calc(-50% + (var(--offset) * clamp(72px, 11vw, 140px)))) translateZ(calc((4 - var(--abs-offset)) * 18px)) rotateY(calc(var(--offset) * -15deg)); transition: transform .28s ease, opacity .28s ease, filter .28s ease; opacity: calc(1 - (var(--abs-offset) * .11)); filter: saturate(calc(1 - (var(--abs-offset) * .07))); }
-.shelfMovie::after { content: ''; position: absolute; top: 0; right: -10px; width: 12px; aspect-ratio: 1 / 12; height: auto; min-height: calc(100% - 44px); border-radius: 0 5px 5px 0; background: linear-gradient(90deg, rgba(0,0,0,.22), rgba(255,255,255,.28)); transform: rotateY(72deg); transform-origin: left; }
+.shelfMovie::after { content: ''; position: absolute; top: 0; right: -10px; width: 12px; min-height: calc(100% - 44px); border-radius: 0 5px 5px 0; background: linear-gradient(90deg, rgba(0,0,0,.22), rgba(255,255,255,.28)); transform: rotateY(72deg); transform-origin: left; }
 .shelfMovie .posterArt { border-radius: 6px; box-shadow: 0 24px 60px rgba(31, 35, 40, .22); }
 .shelfMovie b, .shelfMovie small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .shelfMovie b { margin-top: 12px; font-size: 14px; font-weight: 560; }
 .shelfMovie small { margin-top: 3px; color: var(--muted); font-size: 12px; }
 .shelfMovie.selected { opacity: 1; filter: saturate(1.08); }
 .shelfMovie.selected .posterArt { box-shadow: 0 28px 80px rgba(31, 35, 40, .28); }
-@media (max-width: 760px) { .collectionShelf { margin-inline: -6px; } .shelfStage { height: 310px; overflow-x: auto; overflow-y: hidden; perspective: 900px; } .shelfMovie { transform: translateX(calc(-50% + (var(--offset) * 96px))) translateZ(calc((4 - var(--abs-offset)) * 8px)) rotateY(calc(var(--offset) * -10deg)); } }
 
 .workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 45vw); gap: 32px; align-items: start; }
 .archive h2 { margin: 0 0 18px; font-size: 15px; font-weight: 500; color: var(--muted); }
@@ -50,13 +54,16 @@ h1 { margin: 0; font-size: clamp(34px, 5vw, 72px); font-weight: 520; letter-spac
 .posterCard strong, .posterCard small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .posterCard strong { margin-top: 10px; font-size: 14px; font-weight: 540; }
 .posterCard small { margin-top: 3px; color: var(--muted); font-size: 12px; }
-.posterArt { display: block; aspect-ratio: 2 / 3; border-radius: 8px; box-shadow: 0 18px 50px rgba(31, 35, 40, 0.16); background: linear-gradient(145deg, #d8d1c4, #5f6b72); }
+.posterArt { position: relative; display: block; aspect-ratio: 2 / 3; border-radius: 8px; overflow: hidden; box-shadow: 0 18px 50px rgba(31, 35, 40, 0.16); background: linear-gradient(145deg, #d8d1c4, #5f6b72); }
+.posterArt img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.posterArt.resultPoster { width: 42px; border-radius: 5px; box-shadow: 0 8px 18px rgba(31, 35, 40, .15); }
 .posterArt.dream { background: radial-gradient(circle at 40% 20%, #bcc7c9, #25313c 45%, #101820); }
 .posterArt.corridor { background: linear-gradient(135deg, #7d2530, #1f554d 58%, #d7a36a); }
 .posterArt.river { background: linear-gradient(150deg, #e4d8bd, #6b9b8f 45%, #d36f50); }
 .posterArt.space { background: radial-gradient(circle at 50% 35%, #d0b06d, #28313b 42%, #080b10); }
 .posterArt.opera { background: linear-gradient(150deg, #1c1718, #7d1f2f 42%, #d7ad62); }
 .posterArt.forest { background: linear-gradient(140deg, #d9cfb2, #40574d 54%, #1f2d28); }
+.posterArt.remote { background: linear-gradient(145deg, #d8d1c4, #5f6b72); }
 .detail { border-radius: 10px; background: linear-gradient(150deg, color-mix(in srgb, var(--detail-bg) 12%, var(--surface)), var(--surface)); border: 1px solid var(--line); box-shadow: var(--shadow); padding: 22px; display: grid; grid-template-columns: 150px 1fr; gap: 22px; position: sticky; top: 24px; }
 .detail h2 { margin: 0 0 10px; font-size: 24px; letter-spacing: 0; }
 .detail p { color: #4d4a45; line-height: 1.7; }
@@ -87,3 +94,4 @@ h1 { margin: 0; font-size: clamp(34px, 5vw, 72px); font-weight: 520; letter-spac
 .modal h2, .modal p { margin: 0; }
 .pendingPoster { width: 86px; }
 @media (max-width: 900px) { .workspace, .detail { grid-template-columns: 1fr; } .detail { position: static; } }
+@media (max-width: 760px) { .collectionShelf { margin-inline: -6px; } .shelfStage { height: 310px; overflow-x: auto; overflow-y: hidden; perspective: 900px; } .shelfMovie { transform: translateX(calc(-50% + (var(--offset) * 96px))) translateZ(calc((4 - var(--abs-offset)) * 8px)) rotateY(calc(var(--offset) * -10deg)); } }

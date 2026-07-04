@@ -14,7 +14,9 @@
     "react-dom": "latest",
     "typescript": "latest"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.15.12"
+  },
   "type": "module",
   "license": "Apache-2.0",
   "engines": {

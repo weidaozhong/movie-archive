@@ -261,7 +261,7 @@ export default function Page() {
                 onClick={() => {
                   if (confirm('确定要退出登录吗？所有本地数据将被清空。')) {
                     setState(initialState());
-                    setSelectedId(null);
+                    setSelectedId('');
                   }
                 }}
                 title="退出登录"
@@ -287,7 +287,7 @@ export default function Page() {
             <button className="navBtn" onClick={() => {
               if (confirm('确定要一键清空所有电影卡片吗？（您的账号登录状态将保留）')) {
                 setState({ ...state, records: [] });
-                setSelectedId(null);
+                setSelectedId('');
               }
             }}>
               Clear All 清空档案

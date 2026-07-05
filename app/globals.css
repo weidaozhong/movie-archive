@@ -33,21 +33,23 @@ h2 { font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 .layoutLeft { position: relative; z-index: 10; width: 50vw; padding: 8vw 6vw 6vw; display: flex; flex-direction: column; justify-content: center; }
 .layoutRight { position: relative; z-index: 10; width: 50vw; display: flex; align-items: center; justify-content: center; }
 
-/* Cinematic Search Overlay */
-.searchOverlay { position: fixed; inset: 0; z-index: 100; background: rgba(244, 243, 237, 0.96); backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px); display: flex; flex-direction: column; padding: 10vw; overflow-y: auto; }
-.searchHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 60px; }
-.searchInput { width: 100%; background: transparent; border: none; font-size: clamp(40px, 6vw, 80px); font-weight: 800; color: var(--ink); outline: none; border-bottom: 4px solid var(--ink); padding-bottom: 20px; font-family: inherit; letter-spacing: -0.03em; }
-.searchInput::placeholder { color: rgba(17, 17, 17, 0.2); }
-.closeBtn { width: 64px; height: 64px; border-radius: 32px; background: var(--ink); color: var(--surface); border: none; font-size: 24px; cursor: pointer; display: grid; place-items: center; transition: transform 0.3s ease; flex-shrink: 0; }
-.closeBtn:hover { transform: scale(1.1); }
+/* Inline Search */
+.inlineSearch { position: relative; display: flex; align-items: center; border-bottom: 2px solid var(--ink); padding-bottom: 4px; transition: width 0.3s ease; width: 200px; }
+.inlineSearch:focus-within, .inlineSearch.active { width: 320px; }
+.inlineSearch input { border: none; background: transparent; outline: none; font-size: 15px; font-weight: 700; color: var(--ink); width: 100%; font-family: inherit; }
+.inlineSearch input::placeholder { color: rgba(17, 17, 17, 0.4); }
+.inlineSearch .clearBtn { background: transparent; border: none; font-size: 16px; cursor: pointer; color: var(--ink); padding: 0 4px; display: grid; place-items: center; }
 
-/* Result Grid inside Search */
-.searchResultGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 60px 40px; margin-top: 60px; padding-bottom: 100px; }
-.searchCard { background: transparent; border: none; text-align: left; cursor: pointer; padding: 0; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.searchCard:hover { transform: translateY(-10px) scale(1.02); }
-.searchCard img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 16px; box-shadow: var(--shadow-float); }
-.searchCard strong { display: block; margin-top: 20px; font-size: 20px; font-weight: 700; color: var(--ink); }
-.searchCard small { display: block; margin-top: 6px; color: var(--muted); font-size: 15px; }
+/* Floating Search Results */
+.searchResultsFloating { position: absolute; top: 90px; right: 6vw; width: 400px; max-height: calc(100vh - 120px); background: var(--paper); border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; box-shadow: var(--shadow-float); z-index: 200; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+.searchMsg { color: var(--muted); font-size: 14px; text-align: center; margin: 20px 0; }
+.searchMsg.error { color: #8f2f35; }
+.searchList { display: flex; flex-direction: column; gap: 12px; }
+.searchResultItem { display: flex; gap: 16px; align-items: center; background: transparent; border: none; cursor: pointer; text-align: left; padding: 8px; border-radius: 12px; transition: background 0.2s; }
+.searchResultItem:hover { background: rgba(0,0,0,0.04); }
+.searchResultItem img { width: 48px; height: 72px; object-fit: cover; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.itemInfo strong { display: block; font-size: 16px; font-weight: 700; color: var(--ink); }
+.itemInfo small { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
 
 /* Cinematic Gallery (Framer Motion) */
 .galleryContainer { position: relative; width: 100%; height: 60vh; display: flex; align-items: center; overflow: visible; }
@@ -65,7 +67,17 @@ h2 { font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 .heroMeta { display: flex; gap: 16px; align-items: center; margin-bottom: 40px; flex-wrap: wrap; }
 .metaBadge { border: 1px solid var(--ink); padding: 8px 20px; border-radius: 999px; font-size: 15px; font-weight: 600; text-transform: uppercase; color: var(--ink); }
 
-.heroSynopsis { font-size: 18px; line-height: 1.8; color: color-mix(in srgb, var(--ink) 80%, transparent); max-width: 640px; margin-bottom: 40px; }
+.heroSynopsis { font-size: 18px; line-height: 1.8; color: color-mix(in srgb, var(--ink) 80%, transparent); max-width: 640px; margin-bottom: 20px; }
+
+/* User Records Display (Left Panel) */
+.userRecordsDisplay { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; max-width: 640px; }
+.userMoodBadge { align-self: flex-start; padding: 6px 16px; border-radius: 999px; font-size: 14px; font-weight: 700; border: 1px solid rgba(0,0,0,0.1); }
+.userMoodBadge[data-mood="无感"] { background: #E8E2D6; border-color: #d1c8b4; }
+.userMoodBadge[data-mood="值得"] { background: #83A78D; color: white; border-color: #6a8c73; }
+.userMoodBadge[data-mood="热爱"] { background: #C26D7C; color: white; border-color: #a75564; }
+.userMoodBadge[data-mood="神作"] { background: #8A7B9E; color: white; border-color: #6e5f83; }
+.userNoteCard { background: rgba(255,255,255,0.4); padding: 16px 20px; border-radius: 12px; font-size: 16px; line-height: 1.6; border-left: 3px solid var(--ink); }
+.userFragmentCard { font-style: italic; font-size: 16px; color: var(--muted); padding: 8px 12px; }
 
 /* Navigation */
 .navbar { position: fixed; top: 0; left: 0; right: 0; padding: 40px 6vw; display: flex; justify-content: space-between; align-items: center; z-index: 50; }

@@ -78,7 +78,6 @@ export default function Page() {
   const [selectedId, setSelectedId] = useState('');
   
   // Search state
-  const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Movie[]>([]);
   const [searching, setSearching] = useState(false);
@@ -183,7 +182,6 @@ export default function Page() {
   function collect(movie: Movie) {
     const next = addRecord(state, movie, new Date().toISOString());
     setState(next);
-    setSearchOpen(false);
     setQuery('');
     setResults([]);
     if (!next.pendingRecord && next.records.length) setSelectedId(next.records[next.records.length - 1].id);
@@ -228,7 +226,14 @@ export default function Page() {
       <nav className="navbar">
         <div className="logo">Cinephile Archive</div>
         <div className="navActions">
-          <button className="navBtn" onClick={() => setSearchOpen(true)}>Search 搜索</button>
+          <div className="inlineSearch">
+            <input 
+              placeholder="搜索电影..." 
+              value={query} 
+              onChange={e => setQuery(e.target.value)} 
+            />
+            {query && <button className="clearBtn" onClick={() => setQuery('')}>✕</button>}
+          </div>
           <button className="navBtn" onClick={() => setImmersiveMode(!immersiveMode)}>
             {immersiveMode ? 'Pure Mode 纯净' : 'Immersive 沉浸'}
           </button>
@@ -237,6 +242,35 @@ export default function Page() {
           </button>
         </div>
       </nav>
+      
+      {/* Floating Search Results */}
+      <AnimatePresence>
+        {query.trim().length > 0 && (
+          <motion.div 
+            className="searchResultsFloating"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+          >
+            {query.trim().length > 0 && query.trim().length < 2 && <p className="searchMsg">请至少输入两个字...</p>}
+            {searching && <p className="searchMsg">正在检索 TMDB 数据库...</p>}
+            {searchError && <p className="searchMsg error">{searchError}</p>}
+            {!searching && !searchError && query.trim().length >= 2 && results.length === 0 && <p className="searchMsg">找不到关于此影片的记录。</p>}
+            
+            <div className="searchList">
+              {results.map((movie) => (
+                <button className="searchResultItem" key={movie.id} onClick={() => collect(movie)}>
+                  <img src={movie.posterUrl} alt={movie.titleZh} referrerPolicy="no-referrer" />
+                  <div className="itemInfo">
+                    <strong>{movie.titleZh}</strong>
+                    <small>{movie.titleOriginal} · {movie.year}</small>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Left Foreground: Typography & Details */}
       <div className="layoutLeft">
@@ -262,8 +296,18 @@ export default function Page() {
                 <p className="heroSynopsis" style={{ margin: 0 }}>
                   {selected.movie.synopsis.length > 120 ? selected.movie.synopsis.slice(0, 120) + '...' : selected.movie.synopsis}
                 </p>
+                
+                {/* User Records Display */}
+                <div className="userRecordsDisplay">
+                  {selected.mood && <div className="userMoodBadge" data-mood={selected.mood}>{selected.mood}</div>}
+                  {selected.mainNote && <div className="userNoteCard">{selected.mainNote}</div>}
+                  {selected.fragments && selected.fragments.length > 0 && selected.fragments[0] && (
+                    <div className="userFragmentCard">❝ {selected.fragments[0]} ❞</div>
+                  )}
+                </div>
+
                 <button className="logBtn" onClick={() => setEditorOpen(true)}>
-                   ✏️ 记录此刻 Log this film
+                   ✏️ {selected.mainNote || selected.fragments?.[0] ? '编辑记录 Edit Record' : '记录此刻 Log this film'}
                 </button>
               </div>
             </motion.div>
@@ -289,7 +333,10 @@ export default function Page() {
                 <motion.div
                   key={record.id}
                   className="coverflowItem"
-                  onClick={() => setSelectedId(record.id)}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    setSelectedId(record.id);
+                  }}
                   animate={{
                     x: offset * 80,
                     z: isActive ? 100 : -absOffset * 100,
@@ -399,44 +446,7 @@ export default function Page() {
         )}
       </AnimatePresence>
 
-      {/* Fullscreen Cinematic Search Overlay */}
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div 
-            className="searchOverlay"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
-          >
-            <div className="searchHeader">
-              <input 
-                autoFocus 
-                className="searchInput" 
-                placeholder="搜索电影... (Type a movie name)" 
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              <button className="closeBtn" onClick={() => setSearchOpen(false)}>×</button>
-            </div>
 
-            <div className="searchResultGrid">
-              {query.trim().length > 0 && query.trim().length < 2 && <p>请至少输入两个字...</p>}
-              {searching && <p>正在跨越大洋检索 TMDB 数据库...</p>}
-              {searchError && <p>{searchError}</p>}
-              {!searching && !searchError && query.trim().length >= 2 && results.length === 0 && <p>找不到任何关于此影片的记录。</p>}
-              
-              {results.map((movie) => (
-                <button className="searchCard" key={movie.id} onClick={() => collect(movie)}>
-                  <img src={movie.posterUrl} alt={movie.titleZh} referrerPolicy="no-referrer" />
-                  <strong>{movie.titleZh}</strong>
-                  <small>{movie.titleOriginal} · {movie.year}</small>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Account Binding Modal */}
       {state.pendingRecord && (

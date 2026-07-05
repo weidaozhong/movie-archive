@@ -483,17 +483,16 @@ export default function Page() {
                为防止清理缓存时丢失数据，并在多台设备间同步您的私人影史，请注册本站专属账号。
              </p>
              <button onClick={() => setShowRegister(true)} style={{ width: '100%', padding: 16, background: '#4a6fa5', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer', marginBottom: 12 }}>
-               👉 注册专属账号
+               👉 注册 / 登录
              </button>
              <button 
                onClick={() => {
-                 const nextRecords = state.pendingRecord ? [...state.records, state.pendingRecord] : state.records;
-                 setState({ ...state, pendingRecord: null, locked: true, records: nextRecords });
-                 if (state.pendingRecord) setSelectedId(state.pendingRecord.id);
+                 // Discard the pending record, preventing bypass
+                 setState({ ...state, pendingRecord: null });
                }} 
                style={{ width: '100%', padding: 16, background: 'transparent', color: 'var(--ink)', border: '2px solid var(--ink)', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}
              >
-               跳过，继续以本地模式保存
+               取消
              </button>
           </div>
         </div>
@@ -503,26 +502,26 @@ export default function Page() {
       {showRegister && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.8)', display: 'grid', placeItems: 'center' }}>
           <div style={{ background: 'var(--surface)', padding: 40, borderRadius: 24, width: 400, color: 'var(--ink)' }}>
-             <h2 style={{ marginBottom: 24, textAlign: 'center' }}>创建账号</h2>
+             <h2 style={{ marginBottom: 24, textAlign: 'center' }}>登录或创建账号</h2>
              <input type="text" placeholder="用户名" style={{ width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', marginBottom: 16, fontSize: 16, background: 'rgba(0,0,0,0.02)' }} />
              <input type="password" placeholder="密码" style={{ width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', marginBottom: 32, fontSize: 16, background: 'rgba(0,0,0,0.02)' }} />
              <button 
                onClick={() => {
                  const nextRecords = state.pendingRecord ? [...state.records, state.pendingRecord] : state.records;
-                 setState({ ...state, account: { username: 'user' }, pendingRecord: null, locked: false, records: nextRecords });
+                 setState({ ...state, account: { username: 'user' }, pendingRecord: null, records: nextRecords });
                  if (state.pendingRecord) setSelectedId(state.pendingRecord.id);
                  setShowRegister(false);
-                 alert('注册成功！您的数据将安全保存至您的专属账号。');
+                 alert('成功！您的数据将安全保存至您的专属账号。');
                }} 
                style={{ width: '100%', padding: 16, background: 'var(--ink)', color: 'var(--surface)', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer', marginBottom: 12 }}
              >
-               确认注册
+               确认
              </button>
              <button 
                onClick={() => setShowRegister(false)} 
                style={{ width: '100%', padding: 16, background: 'transparent', color: 'var(--ink)', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
              >
-               取消
+               返回
              </button>
           </div>
         </div>

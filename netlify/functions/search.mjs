@@ -1,4 +1,4 @@
-const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w780';
 const SEARCH_TIMEOUT_MS = 6000;
 
 function tmdbImage(path) {

@@ -96,6 +96,7 @@ export default function Page() {
   
   // Account state
   const [showRegister, setShowRegister] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   
   const [musicOn, setMusicOn] = useState(false);
   const [immersiveMode, setImmersiveMode] = useState(true);
@@ -236,6 +237,12 @@ export default function Page() {
       <nav className="navbar">
         <div className="logo">Cinephile Archive</div>
         <div className="navActions">
+          {state.account && (
+            <div className="accountBadge">
+              <span className="avatar">👤</span>
+              {state.account.username}
+            </div>
+          )}
           <div className="inlineSearch">
             <input 
               placeholder="搜索电影..." 
@@ -244,6 +251,11 @@ export default function Page() {
             />
             {query && <button className="clearBtn" onClick={() => setQuery('')}>✕</button>}
           </div>
+          {state.records.length > 0 && (
+            <button className="navBtn" onClick={() => setLibraryOpen(true)}>
+              📚 档案库
+            </button>
+          )}
           {state.records.length > 0 && (
             <button className="navBtn" onClick={() => {
               if (confirm('确定要一键清空所有电影卡片吗？')) {
@@ -526,6 +538,41 @@ export default function Page() {
           </div>
         </div>
       )}
+
+      {/* Library Grid Overlay */}
+      <AnimatePresence>
+        {libraryOpen && (
+          <motion.div 
+            className="libraryOverlay"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
+          >
+            <div className="libraryHeader">
+              <h2>所有档案 All Archives <span style={{ fontSize: '20px', color: 'rgba(255,255,255,0.5)', marginLeft: 16 }}>{state.records.length}部记录</span></h2>
+              <button className="closeLibraryBtn" onClick={() => setLibraryOpen(false)}>✕</button>
+            </div>
+            
+            <div className="libraryGrid">
+              {state.records.map((record) => (
+                <button 
+                  key={record.id} 
+                  className="libraryCard" 
+                  onClick={() => {
+                    setSelectedId(record.id);
+                    setLibraryOpen(false);
+                  }}
+                >
+                  <img src={record.movie.posterUrl} alt={record.movie.titleZh} referrerPolicy="no-referrer" />
+                  <div className="cardTitle">{record.movie.titleZh}</div>
+                  {record.movie.year && <div className="cardMeta">{record.movie.year}</div>}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

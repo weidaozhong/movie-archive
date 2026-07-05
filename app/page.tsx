@@ -38,7 +38,7 @@ function hydrateMovie(movie: any): Movie {
     titleZh: movie?.titleZh || movie?.title || '未知电影',
     titleOriginal: movie?.titleOriginal || movie?.original_title || movie?.titleZh || 'Unknown title',
     year: typeof movie?.year === 'number' ? movie.year : null,
-    director: movie?.director || 'TMDB',
+    director: movie?.director || '',
     genres: Array.isArray(movie?.genres) ? movie.genres : [],
     synopsis: movie?.synopsis || '暂无简介。',
     palette: Array.isArray(movie?.palette) ? movie.palette : EMPTY_PALETTE,
@@ -86,6 +86,7 @@ export default function Page() {
   
   // Editor state
   const [editorOpen, setEditorOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('');
   
   const [musicOn, setMusicOn] = useState(false);
   const [immersiveMode, setImmersiveMode] = useState(true);
@@ -256,7 +257,7 @@ export default function Page() {
                 <div className="heroMeta" style={{ marginBottom: '16px' }}>
                   <span className="metaBadge">{selected.movie.titleOriginal}</span>
                   {selected.movie.year && <span className="metaBadge">{selected.movie.year}</span>}
-                  <span className="metaBadge">{selected.movie.director}</span>
+                  {selected.movie.director && <span className="metaBadge">{selected.movie.director}</span>}
                 </div>
                 <p className="heroSynopsis" style={{ margin: 0 }}>
                   {selected.movie.synopsis.length > 120 ? selected.movie.synopsis.slice(0, 120) + '...' : selected.movie.synopsis}
@@ -380,8 +381,18 @@ export default function Page() {
                   />
                </div>
 
-               <button className="saveBtn" data-mood={selected.mood} onClick={() => setEditorOpen(false)}>
-                 💾 保存记录 Save Record
+               <button 
+                 className="saveBtn" 
+                 data-mood={selected.mood} 
+                 onClick={() => {
+                   setSaveStatus('saved');
+                   setTimeout(() => {
+                     setSaveStatus('');
+                     setEditorOpen(false);
+                   }, 800);
+                 }}
+               >
+                 {saveStatus === 'saved' ? '✅ 已保存至本地档案' : '💾 保存记录 Save Record'}
                </button>
             </motion.div>
           </motion.div>

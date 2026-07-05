@@ -224,8 +224,8 @@ export default function Page() {
 
       {/* Navigation */}
       <nav className="navbar">
-        <div className="logo">Cinephile Archive</div>
-        <div className="navActions">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+          <div className="logo">Cinephile Archive</div>
           <div className="inlineSearch">
             <input 
               placeholder="搜索电影..." 
@@ -234,6 +234,8 @@ export default function Page() {
             />
             {query && <button className="clearBtn" onClick={() => setQuery('')}>✕</button>}
           </div>
+        </div>
+        <div className="navActions">
           <button className="navBtn" onClick={() => setImmersiveMode(!immersiveMode)}>
             {immersiveMode ? 'Pure Mode 纯净' : 'Immersive 沉浸'}
           </button>

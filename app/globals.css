@@ -41,7 +41,7 @@ h2 { font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 .inlineSearch .clearBtn { background: transparent; border: none; font-size: 16px; cursor: pointer; color: var(--ink); padding: 0 4px; display: grid; place-items: center; }
 
 /* Floating Search Results */
-.searchResultsFloating { position: absolute; top: 90px; right: 6vw; width: 400px; max-height: calc(100vh - 120px); background: var(--paper); border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; box-shadow: var(--shadow-float); z-index: 200; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+.searchResultsFloating { position: absolute; top: 90px; left: calc(6vw + 300px); width: 400px; max-height: calc(100vh - 120px); background: var(--paper); border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; box-shadow: var(--shadow-float); z-index: 200; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
 .searchMsg { color: var(--muted); font-size: 14px; text-align: center; margin: 20px 0; }
 .searchMsg.error { color: #8f2f35; }
 .searchList { display: flex; flex-direction: column; gap: 12px; }
@@ -93,7 +93,7 @@ h2 { font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 .deleteBadge:hover { background: #8f2f35; transform: scale(1.1); }
 
 /* Coverflow Specific */
-.coverflowContainer { position: relative; width: 100%; height: 60vh; display: flex; align-items: center; justify-content: center; perspective: 1200px; transform-style: preserve-3d; }
+.coverflowContainer { position: relative; width: 100%; height: 60vh; display: flex; align-items: center; justify-content: center; perspective: 1200px; }
 .coverflowItem { position: absolute; width: 280px; aspect-ratio: 2/3; border-radius: 24px; box-shadow: var(--shadow-float); overflow: hidden; transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
 .coverflowItem img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 

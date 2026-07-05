@@ -62,10 +62,17 @@ function hydrateState(value: string | null): LibraryState {
   if (!value) return initialState();
   try {
     const saved = JSON.parse(value);
+    const records = Array.isArray(saved.records) ? saved.records.map(hydrateRecord) : [];
+    
+    // Auto-purge old mock data (numeric IDs) from previous prototype so users don't see broken default cards
+    if (records.some(r => typeof r.id === 'number' || typeof r.movie?.id === 'number')) {
+      return initialState();
+    }
+
     return {
       ...initialState(),
       ...saved,
-      records: Array.isArray(saved.records) ? saved.records.map(hydrateRecord) : [],
+      records,
       pendingRecord: saved.pendingRecord ? hydrateRecord(saved.pendingRecord) : null,
     };
   } catch {
@@ -224,8 +231,8 @@ export default function Page() {
 
       {/* Navigation */}
       <nav className="navbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-          <div className="logo">Cinephile Archive</div>
+        <div className="logo">Cinephile Archive</div>
+        <div className="navActions">
           <div className="inlineSearch">
             <input 
               placeholder="搜索电影..." 
@@ -234,8 +241,16 @@ export default function Page() {
             />
             {query && <button className="clearBtn" onClick={() => setQuery('')}>✕</button>}
           </div>
-        </div>
-        <div className="navActions">
+          {state.records.length > 0 && (
+            <button className="navBtn" onClick={() => {
+              if (confirm('确定要一键清空所有电影卡片吗？')) {
+                setState({ ...state, records: [] });
+                setSelectedId('');
+              }
+            }}>
+              Clear All 清空档案
+            </button>
+          )}
           <button className="navBtn" onClick={() => setImmersiveMode(!immersiveMode)}>
             {immersiveMode ? 'Pure Mode 纯净' : 'Immersive 沉浸'}
           </button>
@@ -308,9 +323,14 @@ export default function Page() {
                   )}
                 </div>
 
-                <button className="logBtn" onClick={() => setEditorOpen(true)}>
-                   ✏️ {selected.mainNote || selected.fragments?.[0] ? '编辑记录 Edit Record' : '记录此刻 Log this film'}
-                </button>
+                <div style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
+                  <button className="logBtn" onClick={() => setEditorOpen(true)}>
+                     ✏️ {selected.mainNote || selected.fragments?.[0] ? '编辑记录 Edit Record' : '记录此刻 Log this film'}
+                  </button>
+                  <button className="deleteBtn" onClick={() => deleteRecord(selected.id)}>
+                     🗑️ 移除此卡片 Remove
+                  </button>
+                </div>
               </div>
             </motion.div>
           ) : (

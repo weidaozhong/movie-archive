@@ -538,8 +538,7 @@ export default function Page() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.8)', display: 'grid', placeItems: 'center' }}>
           <div style={{ background: 'var(--surface)', padding: 40, borderRadius: 24, width: 400, color: 'var(--ink)' }}>
              <h2 style={{ marginBottom: 24, textAlign: 'center' }}>登录或创建账号</h2>
-             <input type="text" placeholder="用户名" value={registerUsername} onChange={e => setRegisterUsername(e.target.value)} style={{ width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', marginBottom: 16, fontSize: 16, background: 'rgba(0,0,0,0.02)' }} />
-             <input type="password" placeholder="密码" style={{ width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', marginBottom: 32, fontSize: 16, background: 'rgba(0,0,0,0.02)' }} />
+             <input type="text" placeholder="创建一个专属用户名" value={registerUsername} onChange={e => setRegisterUsername(e.target.value)} style={{ width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', marginBottom: 32, fontSize: 16, background: 'rgba(0,0,0,0.02)' }} />
              <button 
                onClick={() => {
                  const nextRecords = state.pendingRecord ? [...state.records, state.pendingRecord] : state.records;

@@ -41,7 +41,7 @@ h2 { font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 .inlineSearch .clearBtn { background: transparent; border: none; font-size: 16px; cursor: pointer; color: var(--ink); padding: 0 4px; display: grid; place-items: center; }
 
 /* Floating Search Results */
-.searchResultsFloating { position: absolute; top: 90px; left: 6vw; width: 400px; max-height: calc(100vh - 120px); background: var(--paper); border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; box-shadow: var(--shadow-float); z-index: 200; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+.searchResultsFloating { position: absolute; top: 90px; right: 6vw; width: 400px; max-height: calc(100vh - 120px); background: var(--paper); border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; box-shadow: var(--shadow-float); z-index: 200; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
 .searchMsg { color: var(--muted); font-size: 14px; text-align: center; margin: 20px 0; }
 .searchMsg.error { color: #8f2f35; }
 .searchList { display: flex; flex-direction: column; gap: 12px; }

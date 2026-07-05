@@ -476,7 +476,14 @@ export default function Page() {
           <div style={{ background: 'var(--surface)', padding: 40, borderRadius: 24, width: 400, color: 'var(--ink)' }}>
              <h2>保存你的电影档案</h2>
              <p style={{ marginBottom: 24, color: 'var(--muted)' }}>创建一个临时访客凭证</p>
-             <button onClick={() => setState({ ...state, pendingRecord: null, locked: true })} style={{ width: '100%', padding: 16, background: 'var(--ink)', color: 'var(--surface)', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}>
+             <button 
+               onClick={() => {
+                 const nextRecords = state.pendingRecord ? [...state.records, state.pendingRecord] : state.records;
+                 setState({ ...state, pendingRecord: null, locked: true, records: nextRecords });
+                 if (state.pendingRecord) setSelectedId(state.pendingRecord.id);
+               }} 
+               style={{ width: '100%', padding: 16, background: 'var(--ink)', color: 'var(--surface)', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}
+             >
                跳过，直接以本地模式体验
              </button>
           </div>

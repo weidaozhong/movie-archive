@@ -8,10 +8,11 @@ Start local preview:
 npm run dev
 ```
 
-Live site: https://weidaozhong-movie-archive.netlify.app
+Live site: https://movie-archive.pages.dev
 
 GitHub source: https://github.com/weidaozhong/movie-archive
 
-Netlify site: weidaozhong-movie-archive
+## Deployment
+Cloudflare Pages project: movie-archive
 
-Working rule: preview changes locally first. Only push to the `main` branch after the user confirms the local preview. Netlify rebuilds and updates the live site automatically after `main` is pushed.
+Working rule: preview changes locally first. Only push to the `main` branch after the user confirms the local preview. Cloudflare Pages rebuilds and updates the live site automatically after `main` is pushed.

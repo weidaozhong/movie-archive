@@ -1,5 +1,7 @@
 # 电影档案
 
+🌐 **在线访问**: [https://movie-archive.pages.dev](https://movie-archive.pages.dev)
+
 一个面向中文用户的私人电影收集网页。用户可以搜索电影、快速加入自己的影单，并记录观后感、碎片想法和标签。
 
 ## 当前功能

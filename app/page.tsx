@@ -248,6 +248,18 @@ export default function Page() {
             <div className="accountBadge">
               <span className="avatar">👤</span>
               {state.account.username}
+              <button 
+                className="logoutBtn" 
+                onClick={() => {
+                  if (confirm('确定要退出登录吗？所有本地数据将被清空。')) {
+                    setState(initialState());
+                    setSelectedId(null);
+                  }
+                }}
+                title="退出登录"
+              >
+                ✕
+              </button>
             </div>
           )}
           <div className="inlineSearch">
@@ -265,9 +277,9 @@ export default function Page() {
           )}
           {state.records.length > 0 && (
             <button className="navBtn" onClick={() => {
-              if (confirm('确定要一键清空所有电影卡片吗？')) {
-                setState({ ...initialState() });
-                setSelectedId('');
+              if (confirm('确定要一键清空所有电影卡片吗？（您的账号登录状态将保留）')) {
+                setState({ ...state, records: [] });
+                setSelectedId(null);
               }
             }}>
               Clear All 清空档案

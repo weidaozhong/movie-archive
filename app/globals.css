@@ -164,6 +164,27 @@ h2 { font-weight: 700; letter-spacing: -0.02em; margin: 0; }
   color: #fff;
   margin-right: 8px;
 }
+.logoutBtn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  opacity: 0;
+  cursor: pointer;
+  padding: 0 4px;
+  margin-left: 4px;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.accountBadge:hover .logoutBtn {
+  opacity: 0.6;
+}
+.logoutBtn:hover {
+  opacity: 1 !important;
+  color: #ff4444 !important;
+}
 .pureMode .accountBadge {
   background: rgba(0, 0, 0, 0.05);
   border-color: rgba(0, 0, 0, 0.1);

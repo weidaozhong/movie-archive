@@ -473,18 +473,24 @@ export default function Page() {
       {/* Account Binding Modal */}
       {state.pendingRecord && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.8)', display: 'grid', placeItems: 'center' }}>
-          <div style={{ background: 'var(--surface)', padding: 40, borderRadius: 24, width: 400, color: 'var(--ink)' }}>
-             <h2>保存你的电影档案</h2>
-             <p style={{ marginBottom: 24, color: 'var(--muted)' }}>创建一个临时访客凭证</p>
+          <div style={{ background: 'var(--surface)', padding: 40, borderRadius: 24, width: 420, color: 'var(--ink)' }}>
+             <h2>云端档案库 (开发中)</h2>
+             <p style={{ marginTop: 16, marginBottom: 24, color: 'var(--muted)', lineHeight: 1.6 }}>
+               您当前所有的电影收藏都<strong>仅保存在此浏览器的本地缓存中</strong>。<br/><br/>
+               为防止清理缓存时丢失数据，并在多台设备间同步您的私人影史，我们强烈建议您注册一个永久的云端账号。
+             </p>
+             <button onClick={() => alert('云端数据库正在紧急搭建中，敬请期待！')} style={{ width: '100%', padding: 16, background: '#4a6fa5', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer', marginBottom: 12 }}>
+               👉 注册云端同步账号 (即将上线)
+             </button>
              <button 
                onClick={() => {
                  const nextRecords = state.pendingRecord ? [...state.records, state.pendingRecord] : state.records;
                  setState({ ...state, pendingRecord: null, locked: true, records: nextRecords });
                  if (state.pendingRecord) setSelectedId(state.pendingRecord.id);
                }} 
-               style={{ width: '100%', padding: 16, background: 'var(--ink)', color: 'var(--surface)', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}
+               style={{ width: '100%', padding: 16, background: 'transparent', color: 'var(--ink)', border: '2px solid var(--ink)', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}
              >
-               跳过，直接以本地模式体验
+               跳过，继续以本地模式保存
              </button>
           </div>
         </div>

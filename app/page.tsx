@@ -518,7 +518,7 @@ export default function Page() {
                为防止清理缓存时丢失数据，并在多台设备间同步您的私人影史，请注册本站专属账号。
              </p>
              <button onClick={() => setShowRegister(true)} style={{ width: '100%', padding: 16, background: '#4a6fa5', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer', marginBottom: 12 }}>
-               👉 注册 / 登录
+               注册 / 登录
              </button>
              <button 
                onClick={() => {

@@ -142,7 +142,7 @@ export default function Page() {
       setSearching(true);
       setSearchError('');
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(normalized)}`);
+        const response = await fetch(`/.netlify/functions/search?q=${encodeURIComponent(normalized)}`);
         const data = await response.json();
         if (cancelled) return;
         if (!response.ok) throw new Error(data.error || '搜索失败');

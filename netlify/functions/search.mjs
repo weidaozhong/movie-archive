@@ -1,13 +1,11 @@
-import { NextResponse } from 'next/server';
-
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w780';
 const SEARCH_TIMEOUT_MS = 6000;
 
-function tmdbImage(path: string) {
+function tmdbImage(path) {
   return path ? `${IMAGE_BASE_URL}${path}` : '';
 }
 
-function normalizeTmdbMovie(item: any) {
+function normalizeTmdbMovie(item) {
   const year = item.release_date ? Number(item.release_date.slice(0, 4)) || null : null;
   const titleZh = item.title || item.name || item.original_title || '未知电影';
   const titleOriginal = item.original_title || titleZh;
@@ -29,7 +27,7 @@ function normalizeTmdbMovie(item: any) {
   };
 }
 
-function tmdbSearchUrl(query: string) {
+function tmdbSearchUrl(query) {
   const params = new URLSearchParams({
     query,
     include_adult: 'false',
@@ -39,20 +37,26 @@ function tmdbSearchUrl(query: string) {
   return `https://api.themoviedb.org/3/search/movie?${params}`;
 }
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const query = (searchParams.get('q') || '').trim();
-  
-  if (query.length < 2) return NextResponse.json({ results: [] });
+function json(statusCode, body) {
+  return {
+    statusCode,
+    headers: { 'content-type': 'application/json; charset=utf-8' },
+    body: JSON.stringify(body),
+  };
+}
+
+export async function handler(event) {
+  const query = (event.queryStringParameters?.q || '').trim();
+  if (query.length < 2) return json(200, { results: [] });
 
   const token = process.env.TMDB_READ_ACCESS_TOKEN;
   const apiKey = process.env.TMDB_API_KEY;
 
   if (!token && !apiKey) {
-    return NextResponse.json({ error: '还没有配置 TMDB API token。' }, { status: 500 });
+    return json(500, { error: '还没有配置 TMDB API token。' });
   }
 
-  const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const url = apiKey ? `${tmdbSearchUrl(query)}&api_key=${apiKey}` : tmdbSearchUrl(query);
 
   try {
@@ -62,14 +66,14 @@ export async function GET(request: Request) {
     });
 
     if (!response.ok) {
-      return NextResponse.json({
+      return json(response.status, {
         error: response.status === 401 ? 'TMDB token 无效。' : 'TMDB 搜索失败，请稍后重试。',
-      }, { status: response.status });
+      });
     }
 
     const data = await response.json();
-    return NextResponse.json({ results: (data.results || []).slice(0, 8).map(normalizeTmdbMovie) });
+    return json(200, { results: (data.results || []).slice(0, 8).map(normalizeTmdbMovie) });
   } catch {
-    return NextResponse.json({ error: '连接 TMDB 超时。请检查网络或稍后重试。' }, { status: 504 });
+    return json(504, { error: '连接 TMDB 超时。请检查网络或稍后重试。' });
   }
 }

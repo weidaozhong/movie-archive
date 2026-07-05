@@ -78,7 +78,7 @@ export async function GET(request: Request) {
 
     const data = await response.json();
     return NextResponse.json({ 
-      results: (data.results || []).slice(0, 8).map(normalizeTmdbMovie) 
+      results: (data.results || []).filter((m: any) => m.poster_path).slice(0, 8).map(normalizeTmdbMovie) 
     });
   } catch (err) {
     console.error('Search API Error:', err);

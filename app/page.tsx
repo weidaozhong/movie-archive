@@ -81,7 +81,7 @@ function hydrateState(value: string | null): LibraryState {
 }
 
 const getProxyUrl = (url: string | undefined | null) => {
-  if (!url) return '';
+  if (!url) return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   if (url.startsWith('https://image.tmdb.org/')) {
     return `/api/proxy-image?url=${encodeURIComponent(url)}`;
   }

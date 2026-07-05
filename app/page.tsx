@@ -98,6 +98,8 @@ export default function Page() {
   const [showRegister, setShowRegister] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   
+  const [synopsisExpanded, setSynopsisExpanded] = useState(false);
+  
   const [musicOn, setMusicOn] = useState(false);
   const [immersiveMode, setImmersiveMode] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -120,6 +122,10 @@ export default function Page() {
     if (musicOn) audio.play().catch(() => setMusicOn(false));
     else audio.pause();
   }, [musicOn]);
+
+  useEffect(() => {
+    setSynopsisExpanded(false);
+  }, [selectedId]);
 
   useEffect(() => {
     const normalized = query.trim();
@@ -325,9 +331,21 @@ export default function Page() {
                   {selected.movie.year && <span className="metaBadge">{selected.movie.year}</span>}
                   {selected.movie.director && <span className="metaBadge">{selected.movie.director}</span>}
                 </div>
-                <p className="heroSynopsis" style={{ margin: 0 }}>
-                  {selected.movie.synopsis.length > 120 ? selected.movie.synopsis.slice(0, 120) + '...' : selected.movie.synopsis}
-                </p>
+                <div className="heroSynopsisContainer" style={{ marginBottom: '16px' }}>
+                  <p className="heroSynopsis" style={{ margin: 0, display: 'inline', transition: 'all 0.3s' }}>
+                    {selected.movie.synopsis.length > 100 && !synopsisExpanded 
+                      ? selected.movie.synopsis.slice(0, 100) + '...' 
+                      : selected.movie.synopsis}
+                  </p>
+                  {selected.movie.synopsis.length > 100 && (
+                    <button 
+                      onClick={() => setSynopsisExpanded(!synopsisExpanded)}
+                      style={{ background: 'none', border: 'none', color: 'var(--ink)', opacity: 0.7, cursor: 'pointer', fontSize: '13px', marginLeft: '8px', fontWeight: 'bold', padding: '0 4px' }}
+                    >
+                      {synopsisExpanded ? '收起 ▴' : '展开查看 ▾'}
+                    </button>
+                  )}
+                </div>
                 
                 {/* User Records Display */}
                 <div className="userRecordsDisplay">

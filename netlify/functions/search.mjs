@@ -17,7 +17,7 @@ function normalizeTmdbMovie(item) {
     titleZh,
     titleOriginal,
     year,
-    director: 'TMDB',
+    director: '',
     genres: [],
     synopsis: item.overview || '暂无简介。',
     palette: ['#2f3437', '#8f2f35'],

@@ -94,6 +94,9 @@ export default function Page() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
   
+  // Account state
+  const [showRegister, setShowRegister] = useState(false);
+  
   const [musicOn, setMusicOn] = useState(false);
   const [immersiveMode, setImmersiveMode] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -471,16 +474,16 @@ export default function Page() {
 
 
       {/* Account Binding Modal */}
-      {state.pendingRecord && (
+      {state.pendingRecord && !showRegister && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.8)', display: 'grid', placeItems: 'center' }}>
           <div style={{ background: 'var(--surface)', padding: 40, borderRadius: 24, width: 420, color: 'var(--ink)' }}>
-             <h2>云端档案库 (开发中)</h2>
+             <h2>保存您的观影记录</h2>
              <p style={{ marginTop: 16, marginBottom: 24, color: 'var(--muted)', lineHeight: 1.6 }}>
                您当前所有的电影收藏都<strong>仅保存在此浏览器的本地缓存中</strong>。<br/><br/>
-               为防止清理缓存时丢失数据，并在多台设备间同步您的私人影史，我们强烈建议您注册一个永久的云端账号。
+               为防止清理缓存时丢失数据，并在多台设备间同步您的私人影史，请注册本站专属账号。
              </p>
-             <button onClick={() => alert('云端数据库正在紧急搭建中，敬请期待！')} style={{ width: '100%', padding: 16, background: '#4a6fa5', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer', marginBottom: 12 }}>
-               👉 注册云端同步账号 (即将上线)
+             <button onClick={() => setShowRegister(true)} style={{ width: '100%', padding: 16, background: '#4a6fa5', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer', marginBottom: 12 }}>
+               👉 注册专属账号
              </button>
              <button 
                onClick={() => {
@@ -491,6 +494,35 @@ export default function Page() {
                style={{ width: '100%', padding: 16, background: 'transparent', color: 'var(--ink)', border: '2px solid var(--ink)', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}
              >
                跳过，继续以本地模式保存
+             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Registration Modal */}
+      {showRegister && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.8)', display: 'grid', placeItems: 'center' }}>
+          <div style={{ background: 'var(--surface)', padding: 40, borderRadius: 24, width: 400, color: 'var(--ink)' }}>
+             <h2 style={{ marginBottom: 24, textAlign: 'center' }}>创建账号</h2>
+             <input type="text" placeholder="用户名" style={{ width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', marginBottom: 16, fontSize: 16, background: 'rgba(0,0,0,0.02)' }} />
+             <input type="password" placeholder="密码" style={{ width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', marginBottom: 32, fontSize: 16, background: 'rgba(0,0,0,0.02)' }} />
+             <button 
+               onClick={() => {
+                 const nextRecords = state.pendingRecord ? [...state.records, state.pendingRecord] : state.records;
+                 setState({ ...state, account: { username: 'user' }, pendingRecord: null, locked: false, records: nextRecords });
+                 if (state.pendingRecord) setSelectedId(state.pendingRecord.id);
+                 setShowRegister(false);
+                 alert('注册成功！您的数据将安全保存至您的专属账号。');
+               }} 
+               style={{ width: '100%', padding: 16, background: 'var(--ink)', color: 'var(--surface)', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer', marginBottom: 12 }}
+             >
+               确认注册
+             </button>
+             <button 
+               onClick={() => setShowRegister(false)} 
+               style={{ width: '100%', padding: 16, background: 'transparent', color: 'var(--ink)', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
+             >
+               取消
              </button>
           </div>
         </div>

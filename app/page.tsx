@@ -80,6 +80,14 @@ function hydrateState(value: string | null): LibraryState {
   }
 }
 
+const getProxyUrl = (url: string | undefined | null) => {
+  if (!url) return '';
+  if (url.startsWith('https://image.tmdb.org/')) {
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  }
+  return url;
+};
+
 export default function Page() {
   const [state, setState] = useState<LibraryState>(initialState);
   const [selectedId, setSelectedId] = useState('');
@@ -142,7 +150,7 @@ export default function Page() {
       setSearching(true);
       setSearchError('');
       try {
-        const response = await fetch(`/.netlify/functions/search?q=${encodeURIComponent(normalized)}`);
+        const response = await fetch(`/api/search?q=${encodeURIComponent(normalized)}`);
         const data = await response.json();
         if (cancelled) return;
         if (!response.ok) throw new Error(data.error || '搜索失败');
@@ -236,7 +244,7 @@ export default function Page() {
       {selected?.movie.posterUrl && (
         <div 
           className="backdropGlow" 
-          style={{ backgroundImage: `url(${selected.movie.posterUrl})` }} 
+          style={{ backgroundImage: `url(${getProxyUrl(selected.movie.posterUrl)})` }} 
         />
       )}
 
@@ -311,7 +319,7 @@ export default function Page() {
             <div className="searchList">
               {results.map((movie) => (
                 <button className="searchResultItem" key={movie.id} onClick={() => collect(movie)}>
-                  <img src={movie.posterUrl} alt={movie.titleZh} referrerPolicy="no-referrer" />
+                  <img src={getProxyUrl(movie.posterUrl)} alt={movie.titleZh} referrerPolicy="no-referrer" />
                   <div className="itemInfo">
                     <strong>{movie.titleZh}</strong>
                     <small>{movie.titleOriginal} · {movie.year}</small>
@@ -421,7 +429,7 @@ export default function Page() {
                       <button className="deleteBadge" onClick={(e) => { e.stopPropagation(); deleteRecord(record.id); }} title="Remove">×</button>
                     </div>
                   )}
-                  <img src={record.movie.posterUrl} alt={record.movie.titleZh} draggable={false} referrerPolicy="no-referrer" />
+                  <img src={getProxyUrl(record.movie.posterUrl)} alt={record.movie.titleZh} draggable={false} referrerPolicy="no-referrer" />
                 </motion.div>
               );
             })}
@@ -598,7 +606,7 @@ export default function Page() {
                     setLibraryOpen(false);
                   }}
                 >
-                  <img src={record.movie.posterUrl} alt={record.movie.titleZh} referrerPolicy="no-referrer" />
+                  <img src={getProxyUrl(record.movie.posterUrl)} alt={record.movie.titleZh} referrerPolicy="no-referrer" />
                   <div className="cardTitle">{record.movie.titleZh}</div>
                   {record.movie.year && <div className="cardMeta">{record.movie.year}</div>}
                 </button>

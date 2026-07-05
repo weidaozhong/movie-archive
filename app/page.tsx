@@ -65,7 +65,7 @@ function hydrateState(value: string | null): LibraryState {
     const records = Array.isArray(saved.records) ? saved.records.map(hydrateRecord) : [];
     
     // Auto-purge old mock data (numeric IDs) from previous prototype so users don't see broken default cards
-    if (records.some(r => typeof r.id === 'number' || typeof r.movie?.id === 'number')) {
+    if (records.some((r: any) => typeof r.id === 'number' || typeof r.movie?.id === 'number')) {
       return initialState();
     }
 

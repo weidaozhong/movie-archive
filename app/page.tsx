@@ -97,6 +97,7 @@ export default function Page() {
   // Account state
   const [showRegister, setShowRegister] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [registerUsername, setRegisterUsername] = useState('');
   
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
   
@@ -259,7 +260,7 @@ export default function Page() {
           </div>
           {state.records.length > 0 && (
             <button className="navBtn" onClick={() => setLibraryOpen(true)}>
-              📚 档案库
+              档案库
             </button>
           )}
           {state.records.length > 0 && (
@@ -537,12 +538,12 @@ export default function Page() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.8)', display: 'grid', placeItems: 'center' }}>
           <div style={{ background: 'var(--surface)', padding: 40, borderRadius: 24, width: 400, color: 'var(--ink)' }}>
              <h2 style={{ marginBottom: 24, textAlign: 'center' }}>登录或创建账号</h2>
-             <input type="text" placeholder="用户名" style={{ width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', marginBottom: 16, fontSize: 16, background: 'rgba(0,0,0,0.02)' }} />
+             <input type="text" placeholder="用户名" value={registerUsername} onChange={e => setRegisterUsername(e.target.value)} style={{ width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', marginBottom: 16, fontSize: 16, background: 'rgba(0,0,0,0.02)' }} />
              <input type="password" placeholder="密码" style={{ width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)', marginBottom: 32, fontSize: 16, background: 'rgba(0,0,0,0.02)' }} />
              <button 
                onClick={() => {
                  const nextRecords = state.pendingRecord ? [...state.records, state.pendingRecord] : state.records;
-                 setState({ ...state, account: { username: 'user' }, pendingRecord: null, records: nextRecords });
+                 setState({ ...state, account: { username: registerUsername || 'Cinephile' }, pendingRecord: null, records: nextRecords });
                  if (state.pendingRecord) setSelectedId(state.pendingRecord.id);
                  setShowRegister(false);
                  alert('成功！您的数据将安全保存至您的专属账号。');

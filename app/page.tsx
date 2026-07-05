@@ -229,7 +229,7 @@ export default function Page() {
   }, [immersiveMode, selected?.movie?.palette]);
 
   return (
-    <main className={`stage ${immersiveMode ? '' : 'pureMode'}`} style={shellStyle}>
+    <main className={`stage ${immersiveMode ? '' : 'pureMode'} ${editorOpen ? 'editor-open' : ''}`} style={shellStyle}>
       <audio ref={audioRef} src="/audio/bgm.wav" loop preload="none" />
       
       {/* Background Layer */}

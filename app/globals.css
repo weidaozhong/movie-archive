@@ -91,7 +91,9 @@ h2 { font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 .navBtn:hover::after { width: 100%; }
 
 /* Utilities */
-.deleteBadge { position: absolute; top: 16px; right: 16px; width: 40px; height: 40px; border-radius: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); color: white; display: grid; place-items: center; font-size: 24px; border: none; transition: all 0.3s ease; cursor: pointer; padding-bottom: 2px; }
+.deleteZone { position: absolute; top: 0; right: 0; width: 100px; height: 100px; z-index: 10; display: flex; justify-content: flex-end; align-items: flex-start; padding: 12px; }
+.deleteBadge { width: 28px; height: 28px; border-radius: 14px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); color: white; display: grid; place-items: center; font-size: 16px; border: none; opacity: 0; transition: all 0.3s ease; cursor: pointer; padding-bottom: 2px; }
+.deleteZone:hover .deleteBadge { opacity: 1; }
 .deleteBadge:hover { background: #8f2f35; transform: scale(1.1); }
 
 /* Coverflow Specific */

@@ -403,7 +403,11 @@ export default function Page() {
                     zIndex: 100 - absOffset
                   }}
                 >
-                  {isActive && <button className="deleteBadge" onClick={(e) => { e.stopPropagation(); deleteRecord(record.id); }} title="Remove">×</button>}
+                  {isActive && (
+                    <div className="deleteZone">
+                      <button className="deleteBadge" onClick={(e) => { e.stopPropagation(); deleteRecord(record.id); }} title="Remove">×</button>
+                    </div>
+                  )}
                   <img src={record.movie.posterUrl} alt={record.movie.titleZh} draggable={false} referrerPolicy="no-referrer" />
                 </motion.div>
               );

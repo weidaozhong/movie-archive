@@ -358,7 +358,7 @@ export default function Page() {
                           className={`aiTag ${selected.tags?.includes(tag) ? 'active' : ''}`}
                           onClick={() => {
                             const tags = selected.tags || [];
-                            if (tags.includes(tag)) updateSelected({ tags: tags.filter(t => t !== tag) });
+                            if (tags.includes(tag)) updateSelected({ tags: tags.filter((t: string) => t !== tag) });
                             else updateSelected({ tags: [...tags, tag] });
                           }}
                         >

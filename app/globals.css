@@ -32,7 +32,7 @@ h2 { font-weight: 700; letter-spacing: -0.02em; margin: 0; }
 /* Layout Grid */
 .layoutLeft { position: relative; z-index: 10; width: 45vw; padding: 8vw 4vw 6vw 6vw; display: flex; flex-direction: column; justify-content: center; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .layoutRight { position: relative; z-index: 10; width: 55vw; display: flex; align-items: center; justify-content: center; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.stage.editor-open .layoutRight { transform: translateX(-28vw); }
+.stage.editor-open .layoutRight { transform: translateX(-12vw); }
 
 /* Inline Search */
 .inlineSearch { position: relative; display: flex; align-items: center; border-bottom: 2px solid var(--ink); padding-bottom: 4px; transition: width 0.3s ease; width: 200px; }

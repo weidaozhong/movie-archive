@@ -14,12 +14,8 @@ function normalizeTmdbMovie(item: any) {
   const titleZh = item.title || item.name || item.original_title || '未知电影';
   const titleOriginal = item.original_title || titleZh;
 
-  // We wrap the image URL with our proxy directly in the API response
-  const rawPosterUrl = tmdbImage(item.poster_path);
-  const posterUrl = rawPosterUrl ? `/api/proxy-image?url=${encodeURIComponent(rawPosterUrl)}` : '';
-
-  const rawBackdropUrl = tmdbImage(item.backdrop_path);
-  const backdropUrl = rawBackdropUrl ? `/api/proxy-image?url=${encodeURIComponent(rawBackdropUrl)}` : '';
+  const posterUrl = tmdbImage(item.poster_path);
+  const backdropUrl = tmdbImage(item.backdrop_path);
 
   return {
     id: `tmdb-${item.id}`,

@@ -191,8 +191,13 @@ export default function Page() {
 
     let cancelled = false;
     const fac = new FastAverageColor();
-    const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(selected.movie.posterUrl)}&w=100`;
-    
+    let rawPosterUrl = selected.movie.posterUrl;
+    if (rawPosterUrl && rawPosterUrl.startsWith('/api/proxy-image')) {
+      try {
+        rawPosterUrl = new URL(rawPosterUrl, 'http://localhost').searchParams.get('url') || rawPosterUrl;
+      } catch (e) {}
+    }
+    const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(rawPosterUrl)}&w=100`;
     fac.getColorAsync(proxyUrl, { crossOrigin: 'anonymous' })
       .then(color => {
         if (cancelled) return;

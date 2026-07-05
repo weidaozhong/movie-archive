@@ -247,7 +247,7 @@ export default function Page() {
           {state.records.length > 0 && (
             <button className="navBtn" onClick={() => {
               if (confirm('确定要一键清空所有电影卡片吗？')) {
-                setState({ ...state, records: [] });
+                setState({ ...initialState() });
                 setSelectedId('');
               }
             }}>

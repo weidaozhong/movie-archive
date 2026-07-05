@@ -13,39 +13,7 @@
 - 主记录、碎片记录、标签
 - 可选 BGM 开关
 
-## 配置 TMDB
 
-1. 打开 https://www.themoviedb.org/settings/api 注册并申请 API。
-2. 优先复制 `API Read Access Token`。
-3. 新建 `.env.local`，填入：
-
-```bash
-TMDB_READ_ACCESS_TOKEN=你的_TMDB_Read_Access_Token
-```
-
-如果你只有 v3 API Key，也可以填：
-
-```bash
-TMDB_API_KEY=你的_TMDB_API_Key
-```
-
-`TMDB_READ_ACCESS_TOKEN` 和 `TMDB_API_KEY` 都不要提交到 Git。
-
-## 开发
-
-```bash
-npm install
-npm run dev
-```
-
-打开 http://127.0.0.1:3000 。
-
-## 验证
-
-```bash
-npm test
-npm run build
-```
 
 ## 许可证
 

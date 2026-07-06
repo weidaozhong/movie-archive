@@ -139,8 +139,120 @@ const generateScatteredPosters = () => {
       rotX: 0, rotY: 0, rotZ: 0
     });
   }
-
   return generated;
+};
+
+const DataGlitchCanvas = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    let animationFrameId: number;
+    
+    type GlitchChar = { x: number, y: number, char: string, age: number, maxAge: number, driftX: number, driftY: number };
+    let chars: GlitchChar[] = [];
+    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>-_=/[]{}#';
+    
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', resize);
+    resize();
+    
+    let lastX = -1000;
+    let lastY = -1000;
+    
+    const onMouseMove = (e: MouseEvent) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      
+      const dist = Math.sqrt(Math.pow(x - lastX, 2) + Math.pow(y - lastY, 2));
+      
+      // Sparsely drop characters (every 60px)
+      if (dist > 60) {
+        // Drop 1 to 2 characters to make it look organic
+        const dropsCount = 1 + Math.floor(Math.random() * 2);
+        for(let i=0; i<dropsCount; i++) {
+          chars.push({
+            x: x + (Math.random() * 30 - 15), 
+            y: y + (Math.random() * 30 - 15),
+            char: charset[Math.floor(Math.random() * charset.length)],
+            age: 0,
+            maxAge: 40 + Math.random() * 40, // 0.6 - 1.3 seconds
+            driftX: (Math.random() - 0.5) * 0.4,
+            driftY: (Math.random() - 0.5) * 0.4 - 0.3 // slight upward drift
+          });
+        }
+        lastX = x;
+        lastY = y;
+      }
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    
+    const render = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const inkColor = getComputedStyle(document.body).getPropertyValue('--ink').trim() || '#000000';
+      
+      ctx.font = '11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      for (let i = chars.length - 1; i >= 0; i--) {
+        const c = chars[i];
+        c.age++;
+        if (c.age >= c.maxAge) {
+          chars.splice(i, 1);
+          continue;
+        }
+        
+        // Glitch effect: randomly change the character rapidly
+        if (Math.random() < 0.15) {
+          c.char = charset[Math.floor(Math.random() * charset.length)];
+        }
+        
+        c.x += c.driftX;
+        c.y += c.driftY;
+        
+        const progress = c.age / c.maxAge;
+        // Non-linear fade out
+        const opacity = Math.max(0, 1 - Math.pow(progress, 2)); 
+        
+        ctx.globalAlpha = opacity * 0.6; 
+        ctx.fillStyle = inkColor;
+        ctx.fillText(c.char, c.x, c.y);
+      }
+      
+      animationFrameId = requestAnimationFrame(render);
+    };
+    
+    render();
+    
+    return () => {
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', onMouseMove);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        pointerEvents: 'none',
+        zIndex: 9998
+      }}
+    />
+  );
 };
 
 export default function Page() {
@@ -163,6 +275,7 @@ export default function Page() {
   const [registerUsername, setRegisterUsername] = useState('');
   
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
+  const [isGeneratingSynopsis, setIsGeneratingSynopsis] = useState(false);
   
   const [musicOn, setMusicOn] = useState(false);
   const [immersiveMode, setImmersiveMode] = useState(true);
@@ -313,7 +426,7 @@ export default function Page() {
     if (!immersiveMode || !selected?.movie?.palette || selected.movie.palette[0] === '#2f3437') return {};
     const color = selected.movie.palette[0];
     return {
-      '--paper': `color-mix(in srgb, ${color} 12%, #f4f3ed)`,
+      '--paper': `color-mix(in srgb, ${color} 8%, #f4f3ed)`,
       '--surface': `color-mix(in srgb, ${color} 4%, #ffffff)`,
       /* Softer ink: 30% movie color mixed with soft dark grey (#1a1a1a) instead of harsh pitch black */
       '--ink': `color-mix(in srgb, ${color} 30%, #1a1a1a)`,
@@ -322,6 +435,28 @@ export default function Page() {
       '--shadow-float': `0 32px 80px color-mix(in srgb, ${color} 20%, rgba(0,0,0,0.12)), 0 8px 32px color-mix(in srgb, ${color} 10%, rgba(0,0,0,0.08))`,
     } as React.CSSProperties;
   }, [immersiveMode, selected?.movie?.palette]);
+
+  // Auto-fetch missing synopsis
+  useEffect(() => {
+    if (selected && selected.movie.synopsis === '暂无简介。' && !isGeneratingSynopsis) {
+      setIsGeneratingSynopsis(true);
+      fetch('/api/generate-synopsis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: selected.movie.titleOriginal || selected.movie.titleZh, year: selected.movie.year })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.synopsis) {
+          updateSelected({ movie: { ...selected.movie, synopsis: data.synopsis } });
+        }
+      })
+      .catch(console.error)
+      .finally(() => {
+        setIsGeneratingSynopsis(false);
+      });
+    }
+  }, [selected?.id, selected?.movie.synopsis]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const stage = e.currentTarget as HTMLElement;
@@ -343,6 +478,7 @@ export default function Page() {
       style={shellStyle}
       onMouseMove={handleMouseMove}
     >
+      <DataGlitchCanvas />
       <audio ref={audioRef} src="/audio/bgm.wav" loop preload="none" />
       
       {/* Background Layer */}
@@ -376,7 +512,6 @@ export default function Page() {
         <div className="navActions">
           {state.account && (
             <div className="accountBadge">
-              <span className="avatar">👤</span>
               {state.account.username}
               <button 
                 className="logoutBtn" 
@@ -477,11 +612,18 @@ export default function Page() {
                 </div>
                 <div className="heroSynopsisContainer" style={{ marginBottom: '16px' }}>
                   <p className="heroSynopsis" style={{ margin: 0, display: 'inline', transition: 'all 0.3s' }}>
-                    {selected.movie.synopsis.length > 100 && !synopsisExpanded 
-                      ? selected.movie.synopsis.slice(0, 100) + '...' 
-                      : selected.movie.synopsis}
+                    {isGeneratingSynopsis ? (
+                      <span style={{ opacity: 0.6, fontStyle: 'italic' }}>
+                        <span className="spinner" style={{ display: 'inline-block', marginRight: '8px', animation: 'spin 1s linear infinite' }}>⟳</span>
+                        正在全网检索《{selected.movie.titleZh}》的原版中文简介...
+                      </span>
+                    ) : (
+                      selected.movie.synopsis.length > 100 && !synopsisExpanded 
+                        ? selected.movie.synopsis.slice(0, 100) + '...' 
+                        : selected.movie.synopsis
+                    )}
                   </p>
-                  {selected.movie.synopsis.length > 100 && (
+                  {!isGeneratingSynopsis && selected.movie.synopsis.length > 100 && (
                     <button 
                       onClick={() => setSynopsisExpanded(!synopsisExpanded)}
                       style={{ background: 'none', border: 'none', color: 'var(--ink)', opacity: 0.7, cursor: 'pointer', fontSize: '13px', marginLeft: '8px', fontWeight: 'bold', padding: '0 4px' }}
@@ -535,8 +677,8 @@ export default function Page() {
             </motion.div>
           ) : (
             <div style={{ color: '#666666' }}>
-               <h1 className="heroTitle" style={{ lineHeight: 1.1, color: '#666666' }}>Archive Empty<br/><span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.05em' }}>空空如也</span></h1>
-               <p className="heroSynopsis" style={{ color: '#666666' }}>The stage is set. Click <span className="interactiveText" onClick={() => document.getElementById('top-search-input')?.focus()}>"Search"</span> in the top right to build your collection.<br/><span style={{ fontSize: '0.9em' }}>舞台已就绪。点击右上角的<span className="interactiveText" onClick={() => document.getElementById('top-search-input')?.focus()}>“搜索”</span>开始构建您的私人影史。</span></p>
+               <h1 className="heroTitle" style={{ lineHeight: 1.1, color: '#666666', transform: 'none', textShadow: 'none' }}>Archive Empty<br/><span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.05em' }}>空空如也</span></h1>
+               <p className="heroSynopsis emptyStateContainer" style={{ color: 'var(--ink)', marginTop: '80px' }}>The stage is set. Click <span className="interactiveText" onClick={() => document.getElementById('top-search-input')?.focus()}>"Search"</span> in the top right to build your collection.<br/><span style={{ fontSize: '0.9em' }}>舞台已就绪。点击右上角的<span className="interactiveText" onClick={() => document.getElementById('top-search-input')?.focus()}>“搜索”</span>开始构建您的私人影史。</span></p>
             </div>
           )}
         </AnimatePresence>

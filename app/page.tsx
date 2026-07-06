@@ -677,7 +677,7 @@ export default function Page() {
             </motion.div>
           ) : (
             <div style={{ color: '#666666' }}>
-               <h1 className="heroTitle" style={{ lineHeight: 1.1, color: '#666666', transform: 'none', textShadow: 'none' }}>Archive Empty<br/><span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.05em' }}>空空如也</span></h1>
+               <h1 className="heroTitle staticHeroTitle" style={{ lineHeight: 1.1, color: '#666666' }}>Archive Empty<br/><span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.05em' }}>空空如也</span></h1>
                <p className="heroSynopsis emptyStateContainer" style={{ color: 'var(--ink)', marginTop: '80px' }}>The stage is set. Click <span className="interactiveText" onClick={() => document.getElementById('top-search-input')?.focus()}>"Search"</span> in the top right to build your collection.<br/><span style={{ fontSize: '0.9em' }}>舞台已就绪。点击右上角的<span className="interactiveText" onClick={() => document.getElementById('top-search-input')?.focus()}>“搜索”</span>开始构建您的私人影史。</span></p>
             </div>
           )}

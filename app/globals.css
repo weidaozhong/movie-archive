@@ -164,16 +164,22 @@ h2 { font-weight: 700; letter-spacing: -0.02em; margin: 0; }
   transform: rotateX(calc(var(--mouse-norm-y, 0) * 10deg)) rotateY(calc(var(--mouse-norm-x, 0) * -10deg));
   transition: transform 0.1s linear;
 }
+
+.staticHeroTitle {
+  transform: none !important;
+  text-shadow: none !important;
+}
+
 .heroMeta { display: flex; gap: 16px; align-items: center; margin-bottom: 40px; flex-wrap: wrap; }
 .metaBadge { border: 1px solid var(--ink); padding: 8px 20px; border-radius: 999px; font-size: 15px; font-weight: 600; text-transform: uppercase; color: var(--ink); }
 
 .emptyStateContainer {
   position: relative;
   transform: perspective(1000px) 
-             rotateX(calc(var(--mouse-norm-y, 0) * -3deg)) 
-             rotateY(calc(var(--mouse-norm-x, 0) * 3deg)) 
-             translate3d(calc(var(--mouse-norm-x, 0) * 15px), calc(var(--mouse-norm-y, 0) * 15px), 0);
-  transition: transform 0.15s ease-out;
+             rotateX(calc(var(--mouse-norm-y, 0) * -8deg)) 
+             rotateY(calc(var(--mouse-norm-x, 0) * 8deg)) 
+             translate3d(calc(var(--mouse-norm-x, 0) * 20px), calc(var(--mouse-norm-y, 0) * 20px), 0px);
+  transition: transform 0.1s linear;
   transform-style: preserve-3d;
   will-change: transform;
 }

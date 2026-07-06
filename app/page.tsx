@@ -83,7 +83,8 @@ function hydrateState(value: string | null): LibraryState {
 const getProxyUrl = (url: string | undefined | null) => {
   if (!url) return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   if (url.startsWith('https://image.tmdb.org/')) {
-    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+    // 使用 Cloudflare 赞助的全球极速图片代理 wsrv.nl，绕过本地 Node.js 代理的并发瓶颈
+    return `https://wsrv.nl/?url=${url.replace('https://', '')}`;
   }
   return url;
 };
@@ -441,7 +442,7 @@ export default function Page() {
             <div className="searchList">
               {results.map((movie) => (
                 <button className="searchResultItem" key={movie.id} onClick={() => collect(movie)}>
-                  <img src={getProxyUrl(movie.posterUrl)} alt={movie.titleZh} referrerPolicy="no-referrer" />
+                  <img src={getProxyUrl(movie.posterUrl?.replace('/w780', '/w92'))} alt={movie.titleZh} referrerPolicy="no-referrer" loading="lazy" />
                   <div className="itemInfo">
                     <strong>{movie.titleZh}</strong>
                     <small>{movie.titleOriginal} · {movie.year}</small>

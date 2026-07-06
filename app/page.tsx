@@ -88,6 +88,60 @@ const getProxyUrl = (url: string | undefined | null) => {
   return url;
 };
 
+const MOCK_POSTERS = [
+  "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+  "https://image.tmdb.org/t/p/w500/vfq1QBOUjzD1Ioc5b4xI5X0Z7Z8.jpg",
+  "https://image.tmdb.org/t/p/w500/saHP97rTPS5eLmrLQEcANmKrsFl.jpg",
+  "https://image.tmdb.org/t/p/w500/iiZZdoQBEYBv6id8su7ImL0oCbD.jpg",
+  "https://image.tmdb.org/t/p/w500/fNOH9f1aA7XRTzl1sAOx9iF553Q.jpg",
+  "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+  "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbFm131BlR4YW.jpg",
+  "https://image.tmdb.org/t/p/w500/sF1U4EUQS8YHUYjNl3pMGNIQyr0.jpg",
+  "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+  "https://image.tmdb.org/t/p/w500/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg",
+  "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+  "https://image.tmdb.org/t/p/w500/kyeqWdyS2PeeQ45ORe9Tq5S2zD.jpg",
+  "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
+  "https://image.tmdb.org/t/p/w500/oU7Oq2kFAAlGqbU4VoAE36g4hoI.jpg",
+  "https://image.tmdb.org/t/p/w500/ryK6ve5K1RuuwP4aNq4oWzF4Uf.jpg"
+];
+
+const generateScatteredPosters = () => {
+  const generated = [];
+  
+  // Track 1: Background Ring
+  const bgCount = 27; // Denser item count for shortened distance
+  for (let i = 0; i < bgCount; i++) {
+    const angle = (i / bgCount) * 360;
+    
+    generated.push({
+      url: MOCK_POSTERS[i % MOCK_POSTERS.length],
+      yOffset: 0,
+      zOffset: -120,
+      scale: 0.45 + Math.abs(Math.cos(i * 77.1)) * 0.1,
+      angle: angle,
+      rotX: 0, rotY: 0, rotZ: 0
+    });
+  }
+
+  // Track 2: Foreground Ring
+  const fgCount = 18; // Denser item count for shortened distance
+  for (let i = 0; i < fgCount; i++) {
+    const angle = (i / fgCount) * 360;
+    
+    generated.push({
+      url: MOCK_POSTERS[(bgCount + i) % MOCK_POSTERS.length],
+      yOffset: 0,
+      zOffset: 90,
+      scale: 0.75 + Math.abs(Math.sin(i * 44.5)) * 0.25,
+      angle: angle,
+      rotX: 0, rotY: 0, rotZ: 0
+    });
+  }
+
+  return generated;
+};
+
 export default function Page() {
   const [state, setState] = useState<LibraryState>(initialState);
   const [selectedId, setSelectedId] = useState('');
@@ -113,6 +167,8 @@ export default function Page() {
   const [immersiveMode, setImmersiveMode] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const [scatteredPosters, setScatteredPosters] = useState<any[]>(generateScatteredPosters());
+
   useEffect(() => {
     setState(hydrateState(localStorage.getItem(STORAGE_KEY)));
     setMusicOn(localStorage.getItem('movie-archive-music') === 'on');
@@ -135,6 +191,30 @@ export default function Page() {
   useEffect(() => {
     setSynopsisExpanded(false);
   }, [selectedId]);
+
+  // Robust sweeper to catch images that loaded (or failed) before React hydrated
+  useEffect(() => {
+    const sweepImages = () => {
+      document.querySelectorAll('.ringItem img').forEach((el) => {
+        const img = el as HTMLImageElement;
+        if (img.complete) {
+          if (img.naturalHeight === 0) {
+            img.parentElement?.setAttribute('hidden', 'true');
+          } else {
+            // It successfully loaded before hydration, so we must manually reveal it!
+            img.parentElement?.setAttribute('data-loaded', 'true');
+          }
+        }
+      });
+    };
+    
+    sweepImages();
+    const t1 = setTimeout(sweepImages, 500);
+    const t2 = setTimeout(sweepImages, 1500);
+    const t3 = setTimeout(sweepImages, 3000);
+    
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
 
   useEffect(() => {
     const normalized = query.trim();
@@ -234,15 +314,34 @@ export default function Page() {
     return {
       '--paper': `color-mix(in srgb, ${color} 12%, #f4f3ed)`,
       '--surface': `color-mix(in srgb, ${color} 4%, #ffffff)`,
-      '--ink': `color-mix(in srgb, ${color} 85%, #111111)`,
+      /* Softer ink: 30% movie color mixed with soft dark grey (#1a1a1a) instead of harsh pitch black */
+      '--ink': `color-mix(in srgb, ${color} 30%, #1a1a1a)`,
       '--line': `color-mix(in srgb, ${color} 20%, rgba(200, 195, 185, 0.4))`,
       '--accent': color,
       '--shadow-float': `0 32px 80px color-mix(in srgb, ${color} 20%, rgba(0,0,0,0.12)), 0 8px 32px color-mix(in srgb, ${color} 10%, rgba(0,0,0,0.08))`,
     } as React.CSSProperties;
   }, [immersiveMode, selected?.movie?.palette]);
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const stage = e.currentTarget as HTMLElement;
+    const rect = stage.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const normX = (x / rect.width) * 2 - 1; // -1 to 1
+    const normY = (y / rect.height) * 2 - 1; // -1 to 1
+    
+    stage.style.setProperty('--mouse-x', `${x}px`);
+    stage.style.setProperty('--mouse-y', `${y}px`);
+    stage.style.setProperty('--mouse-norm-x', normX.toString());
+    stage.style.setProperty('--mouse-norm-y', normY.toString());
+  };
+
   return (
-    <main className={`stage ${immersiveMode ? '' : 'pureMode'} ${editorOpen ? 'editor-open' : ''}`} style={shellStyle}>
+    <main 
+      className={`stage ${immersiveMode ? '' : 'pureMode'} ${editorOpen ? 'editor-open' : ''}`} 
+      style={shellStyle}
+      onMouseMove={handleMouseMove}
+    >
       <audio ref={audioRef} src="/audio/bgm.wav" loop preload="none" />
       
       {/* Background Layer */}
@@ -253,9 +352,26 @@ export default function Page() {
         />
       )}
 
+      {/* Interactive Cinematic Effects */}
+      <div className="ambientSpotlight" />
+      <div className="cinematicDust">
+        {Array.from({ length: 35 }).map((_, i) => (
+          <div 
+            key={i} 
+            className="dustParticle" 
+            style={{ 
+              left: `${(Math.abs(Math.sin(i * 123.45)) * 100).toFixed(2)}%`, 
+              top: `${(Math.abs(Math.cos(i * 321.98)) * 100).toFixed(2)}%`,
+              animationDuration: `${(Math.abs(Math.sin(i * 55.5)) * 15 + 15).toFixed(2)}s`,
+              animationDelay: `${(Math.abs(Math.cos(i * 77.7)) * -30).toFixed(2)}s` 
+            }} 
+          />
+        ))}
+      </div>
+
       {/* Navigation */}
       <nav className="navbar">
-        <div className="logo">Cinephile Archive</div>
+        <div className="logo">Cinephile Archive 迷影档案馆</div>
         <div className="navActions">
           {state.account && (
             <div className="accountBadge">
@@ -277,6 +393,7 @@ export default function Page() {
           )}
           <div className="inlineSearch">
             <input 
+              id="top-search-input"
               placeholder="搜索电影..." 
               value={query} 
               onChange={e => setQuery(e.target.value)} 
@@ -347,7 +464,7 @@ export default function Page() {
               exit={{ opacity: 0, x: 40, filter: 'blur(10px)' }}
               transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
             >
-              <p className="eyebrow" style={{ letterSpacing: '0.3em', marginBottom: '20px' }}>YOUR PERSONAL COLLECTION</p>
+              <p className="eyebrow" style={{ letterSpacing: '0.3em', marginBottom: '20px' }}>YOUR PERSONAL COLLECTION 你的私人收藏</p>
               <h1 className="heroTitle">CINEPHILE<br/>ARCHIVE.</h1>
               
               <div className="selectedInfo" style={{ marginTop: '60px', paddingLeft: '24px', borderLeft: '4px solid var(--ink)' }}>
@@ -375,27 +492,50 @@ export default function Page() {
                 
                 {/* User Records Display */}
                 <div className="userRecordsDisplay">
-                  {selected.mood && <div className="userMoodBadge" data-mood={selected.mood}>{selected.mood}</div>}
-                  {selected.mainNote && <div className="userNoteCard">{selected.mainNote}</div>}
+                  {selected.mood && (
+                    <div className="userMoodBadge recordFieldContainer" data-mood={selected.mood}>
+                      {selected.mood}
+                      <button className="clearFieldBtn" onClick={(e) => { e.stopPropagation(); updateSelected({ mood: '' }); }} title="移除感受标记">✕</button>
+                    </div>
+                  )}
+                  {selected.tags && selected.tags.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '-4px' }}>
+                      {selected.tags.map((tag: string) => (
+                        <div key={tag} className="userTag recordFieldContainer">
+                          #{tag}
+                          <button className="clearFieldBtn" onClick={(e) => { e.stopPropagation(); updateSelected({ tags: selected.tags.filter((t: string) => t !== tag) }); }} title="移除此标签">✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {selected.mainNote && (
+                    <div className="userNoteCard recordFieldContainer">
+                      {selected.mainNote}
+                      <button className="clearFieldBtn" onClick={(e) => { e.stopPropagation(); updateSelected({ mainNote: '' }); }} title="移除长文记录">✕</button>
+                    </div>
+                  )}
                   {selected.fragments && selected.fragments.length > 0 && selected.fragments[0] && (
-                    <div className="userFragmentCard">❝ {selected.fragments[0]} ❞</div>
+                    <div className="userFragmentCard recordFieldContainer">
+                      ❝ {selected.fragments[0]} ❞
+                      <button className="clearFieldBtn" onClick={(e) => { e.stopPropagation(); updateSelected({ fragments: [] }); }} title="移除摘录碎片">✕</button>
+                    </div>
                   )}
                 </div>
 
                 <div style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
                   <button className="logBtn" onClick={() => setEditorOpen(true)}>
-                     ✏️ {selected.mainNote || selected.fragments?.[0] ? '编辑记录 Edit Record' : '记录此刻 Log this film'}
+                    {selected.mainNote || selected.fragments?.[0] ? '编辑记录 Edit Record' : '记录此刻 Log this film'}
                   </button>
                   <button className="deleteBtn" onClick={() => deleteRecord(selected.id)}>
-                     🗑️ 移除此卡片 Remove
+                    移除此卡片 Remove
                   </button>
                 </div>
               </div>
             </motion.div>
           ) : (
-            <div style={{ opacity: 0.5 }}>
-               <h1 className="heroTitle">Archive Empty</h1>
-               <p className="heroSynopsis">The stage is set. Click "Search" in the top right to build your collection.</p>
+            <div style={{ color: '#666666' }}>
+               <h1 className="heroTitle" style={{ lineHeight: 1.1, color: '#666666' }}>Archive Empty<br/><span style={{ fontSize: '0.65em', fontWeight: 700, letterSpacing: '0.05em' }}>空空如也</span></h1>
+               <p className="heroSynopsis" style={{ color: '#666666' }}>The stage is set. Click <span className="interactiveText" onClick={() => document.getElementById('top-search-input')?.focus()}>"Search"</span> in the top right to build your collection.<br/><span style={{ fontSize: '0.9em' }}>舞台已就绪。点击右上角的<span className="interactiveText" onClick={() => document.getElementById('top-search-input')?.focus()}>“搜索”</span>开始构建您的私人影史。</span></p>
             </div>
           )}
         </AnimatePresence>
@@ -439,7 +579,35 @@ export default function Page() {
               );
             })}
           </div>
-        ) : null}
+        ) : (
+          <div className="emptyStateRingContainer">
+            <div className="emptyStateRing">
+              {scatteredPosters.map((item, i) => {
+                return (
+                  <div 
+                    className="ringItem" 
+                    key={`${item.url}-${i}`} 
+                    style={{ 
+                      transform: `rotateY(${item.angle.toFixed(2)}deg) translateZ(${700 + (item.zOffset ?? 0)}px) scale(${(item.scale ?? 1).toFixed(2)})`
+                    }}
+                  >
+                  <img 
+                    src={getProxyUrl(item.url)} 
+                    alt="mock poster" 
+                    draggable={false} 
+                    referrerPolicy="no-referrer"
+                    onLoad={(e) => {
+                      (e.target as HTMLImageElement).parentElement!.setAttribute('data-loaded', 'true');
+                    }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).parentElement!.setAttribute('hidden', 'true');
+                    }}
+                  />
+                </div>
+              )})}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Glassmorphic Editor Panel */}
@@ -453,14 +621,15 @@ export default function Page() {
               exit={{ x: '100%' }} 
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             >
-               <div className="editorHeader">
-                  <h2>档案编辑 · {selected.movie.titleZh}</h2>
-                  <button className="closeEditorBtn" onClick={() => setEditorOpen(false)}>×</button>
-               </div>
-               
-               <div className="editorSection">
-                  <label>感受标记 Mood Marks</label>
-                  <div className="moodGrid">
+               <div style={{ margin: 'auto 0', display: 'flex', flexDirection: 'column', gap: '32px', width: '100%' }}>
+                 <div className="editorHeader">
+                    <h2>档案编辑 · {selected.movie.titleZh}</h2>
+                    <button className="closeEditorBtn" onClick={() => setEditorOpen(false)}>×</button>
+                 </div>
+                 
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                    <label style={{ margin: 0 }}>感受标记 MOOD MARKS</label>
+                    <div className="moodGrid">
                     {MOOD_MARKS.map(m => (
                       <button 
                         key={m} 
@@ -471,11 +640,20 @@ export default function Page() {
                         {m}
                       </button>
                     ))}
-                  </div>
-               </div>
+                    </div>
+                 </div>
 
-               <div className="editorSection">
-                  <label>长文记录 Main Note</label>
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                      <label style={{ margin: 0 }}>长文记录 MAIN NOTE</label>
+                      {selected.mainNote && (
+                      <button 
+                        onClick={() => updateSelected({ mainNote: '' })}
+                        style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'var(--foreground)', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', cursor: 'pointer', opacity: 0.6 }}
+                        title="清空长文记录"
+                      >✕</button>
+                    )}
+                  </div>
                   <textarea 
                     className="editorTextarea" 
                     placeholder="写下你对这部电影最深刻的感受..."
@@ -484,7 +662,16 @@ export default function Page() {
                   />
                   {selected.mainNote && (
                     <div className="aiTagsGrid" style={{ marginTop: '16px' }}>
-                      <p style={{ width: '100%', fontSize: '13px', color: 'var(--muted)', margin: '0 0 8px 0' }}>💡 AI 候选标签 (点击贴靠)</p>
+                      <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', margin: '0 0 8px 0' }}>
+                        <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0, letterSpacing: '0.05em', fontWeight: 700 }}>候选标签 TAGS</p>
+                        {selected.tags && selected.tags.length > 0 && (
+                          <button 
+                            onClick={() => updateSelected({ tags: [] })}
+                            style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'var(--foreground)', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', cursor: 'pointer', opacity: 0.6 }}
+                            title="清空已选标签"
+                          >✕</button>
+                        )}
+                      </div>
                       {extractTagCandidates(selected.mainNote).map(tag => (
                         <button 
                           key={tag} 
@@ -502,30 +689,46 @@ export default function Page() {
                   )}
                </div>
 
-               <div className="editorSection">
-                  <label>碎片摘录 Fragments</label>
-                  <textarea 
-                    className="editorTextarea" 
-                    style={{ minHeight: '80px' }}
-                    placeholder="一句印象深刻的台词，或一个画面..."
-                    value={selected.fragments?.[0] || ''}
-                    onChange={e => updateSelected({ fragments: [e.target.value] })}
-                  />
-               </div>
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                      <label style={{ margin: 0 }}>碎片摘录 FRAGMENTS</label>
+                      {selected.fragments && selected.fragments.length > 0 && selected.fragments[0] && (
+                        <button 
+                          onClick={() => updateSelected({ fragments: [] })}
+                          style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'var(--foreground)', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', cursor: 'pointer', opacity: 0.6 }}
+                          title="清空碎片摘录"
+                        >✕</button>
+                      )}
+                    </div>
+                    <textarea 
+                      className="editorTextarea" 
+                      style={{ minHeight: '80px' }}
+                      placeholder="一句印象深刻的台词，或一个画面..."
+                      value={selected.fragments?.[0] || ''}
+                      onChange={e => updateSelected({ fragments: [e.target.value] })}
+                    />
+                 </div>
 
-               <button 
-                 className="saveBtn" 
-                 data-mood={selected.mood} 
-                 onClick={() => {
-                   setSaveStatus('saved');
-                   setTimeout(() => {
-                     setSaveStatus('');
-                     setEditorOpen(false);
-                   }, 800);
-                 }}
-               >
-                 {saveStatus === 'saved' ? '✅ 已保存至本地档案' : '💾 保存记录 Save Record'}
-               </button>
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
+                   <button 
+                     className="saveBtn" 
+                     onClick={() => updateSelected({ mood: '', mainNote: '', tags: [], fragments: [] })}
+                     style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)', color: 'var(--ink)', marginTop: 0 }}
+                     title="清空当前电影的所有记录"
+                   >
+                     一键清空 CLEAR ALL
+                   </button>
+    
+                   <button 
+                     className="saveBtn" 
+                     data-mood={selected.mood} 
+                     onClick={() => setEditorOpen(false)}
+                     style={{ marginTop: 0 }}
+                   >
+                     完成 DONE
+                   </button>
+                 </div>
+               </div>
             </motion.div>
           </motion.div>
         )}
